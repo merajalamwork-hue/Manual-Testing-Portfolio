@@ -80,7 +80,7 @@ Visibility for Better UI Separation
 | Type | UX / Accessibility Enhancement |
 | WCAG | 1.4.11 Non-text Contrast |
 | Platform | Web — app.plane.so |
-| Status | Open — Assigned to maintainers |
+| Status | 🔄 In Progress — Being implemented by @aggmoulik |
 
 🔗 [View Issue #9095](https://github.com/makeplane/plane/issues/9095)
 
