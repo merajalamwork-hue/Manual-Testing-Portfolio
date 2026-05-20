@@ -25,6 +25,8 @@ and error handling.
 | Actual | 200 OK ✅ |
 | Result | PASS |
 
+---
+
 ### Test 2 — Invalid Credentials on Playground
 | Field | Details |
 |-------|---------|
@@ -32,11 +34,11 @@ and error handling.
 | Auth | @@@@@@@@ + @@@@@@@@ |
 | Expected | 401 Unauthorized |
 | Actual | 200 OK |
-| Result | ⚠️ Needs Clarification |
-| Note | Playground returns 200 OK with invalid 
-credentials. Requires confirmation from 
-maintainers whether this is intentional 
-for demo purposes or a security oversight. |
+| Result | ✅ Confirmed — Intentional by Design |
+| Note | Confirmed by AutoMQ contributor @johnluoyx: Playground is intentionally designed as an open demo environment. All data is mock/demo only and fully isolated from production systems. |
+| Reference | github.com/AutoMQ/automq/issues/3365 |
+
+---
 
 ### Test 3 — No Auth on Playground
 | Field | Details |
@@ -45,10 +47,11 @@ for demo purposes or a security oversight. |
 | Auth | None |
 | Expected | 401 Unauthorized |
 | Actual | 200 OK |
-| Result | ⚠️ Needs Clarification |
-| Note | Playground returns 200 OK with zero 
-authentication. Same as Test 2 — 
-awaiting maintainer confirmation. |
+| Result | ✅ Confirmed — Intentional by Design |
+| Note | Same as Test 2 — confirmed intentional. Playground APIs return 200 OK even with no credentials as it is a fully open demo environment. |
+| Reference | github.com/AutoMQ/automq/issues/3365 |
+
+---
 
 ### Test 4 — No Auth on Real Console
 | Field | Details |
@@ -59,6 +62,8 @@ awaiting maintainer confirmation. |
 | Expected | 401 Unauthorized |
 | Actual | 401 Unauthorized ✅ |
 | Result | PASS — Real auth works correctly |
+
+---
 
 ### Test 5 — Playground Keys on Console
 | Field | Details |
@@ -125,6 +130,8 @@ awaiting maintainer confirmation. |
 | Severity | Low |
 | Recommendation | Return proper JSON error response for invalid IDs |
 
+---
+
 ### Finding 2 — Wrong Endpoint Returns HTML
 | Field | Details |
 |-------|---------|
@@ -137,16 +144,35 @@ awaiting maintainer confirmation. |
 
 ---
 
-## 📚 Key Learnings
+### Finding 3 — Playground Authentication Behavior
+Not Documented in Official Docs
+| Field | Details |
+|-------|---------|
+| Type | Documentation Gap |
+| Severity | Low |
+| Details | Playground API is intentionally open without authentication. However this behavior is not mentioned anywhere in the official documentation at docs.automq.com. New users and testers may confuse this with a security oversight. |
+| Suggestion | Add a note in Playground docs explaining that no authentication is required and all data is mock/demo only. |
+| Confirmed By | @johnluoyx (AutoMQ Contributor) |
+| Reference | github.com/AutoMQ/automq/issues/3365 |
+| Status | 💡 Suggestion shared with maintainers |
 
+---
+
+## 📚 Key Learnings
 - AutoMQ Playground is intentionally open —
-  no auth required by design
+  no auth required by design (confirmed by maintainer)
+- All Playground data is mock/demo —
+  fully isolated from production systems
 - Real console (console.automq.cloud) correctly
   enforces authentication
 - Service account keys are isolated per environment
 - Topics and Groups are sub-resources of Instances
 - Unknown routes return SPA HTML fallback
   instead of JSON 404
+- Always confirm behavior with maintainers
+  before documenting assumptions
+- Always check documentation before suggesting
+  improvements
 
 ---
 
@@ -158,13 +184,16 @@ awaiting maintainer confirmation. |
 | GET | /api/v1/instances/{id}/topics | List topics |
 | GET | /api/v1/instances/{id}/groups | List consumer groups |
 
+---
 
-## 🔄 Pending Confirmations
+## ✅ Confirmed Findings
 
 ### Auth Behavior on Playground
-- GitHub Issue: #3365
-- Question: Is Playground API intentionally 
-  open without authentication?
-- Status: Awaiting maintainer response
-- Date Asked: 20 May 2026
-- Link: github.com/AutoMQ/automq/issues/3365
+| Field | Details |
+|-------|---------|
+| GitHub Issue | #3365 |
+| Question | Is Playground API intentionally open without authentication? |
+| Status | ✅ Confirmed by @johnluoyx (AutoMQ Contributor) |
+| Answer | Intentionally open by design — demo environment |
+| Date Confirmed | 20 May 2026 |
+| Link | github.com/AutoMQ/automq/issues/3365 |
