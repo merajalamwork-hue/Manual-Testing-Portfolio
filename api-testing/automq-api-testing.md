@@ -3,14 +3,13 @@
 **Tester:** Meraj Alam (@merajalamwork-hue)
 **Platform:** AutoMQ Playground (playground.automq.cloud)
 **Tool:** Postman
-**Date:** 20 May 2026
+**Dates:** 20–21 May 2026
 
 ---
 
 ## 🎯 Objective
-To test the AutoMQ Cloud REST API endpoints for
-correct functionality, authentication behavior,
-and error handling.
+To test the AutoMQ Cloud REST API endpoints for correct functionality,
+authentication behavior, and error handling.
 
 ---
 
@@ -77,7 +76,7 @@ and error handling.
 
 ---
 
-## 📊 Endpoint Testing
+## 📊 Endpoint Testing (Day 1 — 20 May 2026)
 
 ### Test 6 — List Instances
 | Field | Details |
@@ -118,61 +117,174 @@ and error handling.
 
 ---
 
-## ⚠️ Findings & Observations
+## 📊 Endpoint Testing (Day 2 — 21 May 2026)
 
-### Finding 1 — Invalid Instance ID Returns HTML
+### Test 9 — Get Single Instance Detail
 | Field | Details |
 |-------|---------|
-| Endpoint | /api/v1/instances/fakeid123/topics |
-| Expected | 404 JSON error response |
-| Actual | 200 OK with HTML page |
-| Type | API Design Issue |
-| Severity | Low |
-| Recommendation | Return proper JSON error response for invalid IDs |
+| Method | GET |
+| Endpoint | /api/v1/instances/kf-cezs05iok5xreimol |
+| Expected | 200 JSON with full instance object |
+| Actual | 200 OK ✅ |
+| Result | PASS |
+
+**Response Fields Verified:**
+- instanceId, name, state ✅
+- statistics (topicCount, partitionCount, consumerGroupCount) ✅
+- spec (nodeConfig, networks, dataBuckets) ✅
+- features (walMode, security, metricsExporter) ✅
 
 ---
 
-### Finding 2 — Wrong Endpoint Returns HTML
+### Test 10 — Invalid Instance ID
+| Field | Details |
+|-------|---------|
+| Method | GET |
+| Endpoint | /api/v1/instances/fakeid123 |
+| Expected | 404 JSON error |
+| Actual | 404 JSON with error code ✅ |
+| Result | PASS |
+
+**Note:** Yesterday this returned `200 OK + HTML`. Today returns proper `404 + JSON`. Bug confirmed fixed by AutoMQ team. ✅
+
+---
+
+### Test 11 — Invalid Instance ID with Sub-resource
+| Field | Details |
+|-------|---------|
+| Method | GET |
+| Endpoint | /api/v1/instances/fakeid123/topics |
+| Expected | 404 JSON error |
+| Actual | 404 JSON with error code ✅ |
+| Result | PASS |
+
+**Note:** This was Finding 1 from Day 1 — now fixed. ✅
+
+---
+
+### Test 12 — Wrong Endpoint (/consumer-groups)
+| Field | Details |
+|-------|---------|
+| Method | GET |
+| Endpoint | /api/v1/instances/{id}/consumer-groups |
+| Expected | 404 JSON error (wrong endpoint) |
+| Actual | 200 OK — returns valid consumer group data |
+| Result | ⚠️ Observation — Undocumented Alias |
+
+**Note:** Both `/groups` and `/consumer-groups` return the same data. This is an undocumented route alias not mentioned in official docs.
+
+---
+
+### Test 13 — Pagination (pageSize=2)
+| Field | Details |
+|-------|---------|
+| Method | GET |
+| Endpoint | /api/v1/instances?pageNum=1&pageSize=2 |
+| Expected | 200 with 2 items, total=5, totalPage=3 |
+| Actual | 200 OK — exactly as expected ✅ |
+| Result | PASS |
+
+---
+
+### Test 14 — Out of Range Page (pageNum=999)
+| Field | Details |
+|-------|---------|
+| Method | GET |
+| Endpoint | /api/v1/instances?pageNum=999&pageSize=10 |
+| Expected | 200 with empty list |
+| Actual | 200 OK — empty list, total=5 ✅ |
+| Result | PASS |
+
+---
+
+### Test 15 — Invalid pageSize (String)
+| Field | Details |
+|-------|---------|
+| Method | GET |
+| Endpoint | /api/v1/instances?pageNum=1&pageSize=abc |
+| Expected | 400 with clean error message |
+| Actual | 400 — but exposes java.lang.String internally |
+| Result | 🔴 BUG — Reported as Issue #3366 |
+
+---
+
+### Test 16 — Invalid pageSize (Negative)
+| Field | Details |
+|-------|---------|
+| Method | GET |
+| Endpoint | /api/v1/instances?pageNum=1&pageSize=-1 |
+| Expected | 400 with clean error message |
+| Actual | 400 — exposes internal fromIndex/toIndex terms |
+| Result | 🔴 BUG — Added to Issue #3366 |
+
+---
+
+### Test 17 — Invalid pageNum (String)
+| Field | Details |
+|-------|---------|
+| Method | GET |
+| Endpoint | /api/v1/instances?pageNum=abc&pageSize=10 |
+| Expected | 400 with clean error message |
+| Actual | 400 — exposes java.lang.String internally |
+| Result | 🔴 BUG — Added to Issue #3366 |
+
+---
+
+### Test 18 — No Query Params (Default Values)
+| Field | Details |
+|-------|---------|
+| Method | GET |
+| Endpoint | /api/v1/instances |
+| Expected | 200 with sensible defaults |
+| Actual | 200 OK — defaults to pageNum=1, pageSize=10 ✅ |
+| Result | PASS |
+
+---
+
+## ✅ Bugs Fixed Since Day 1
+
+| Finding | Day 1 | Day 2 |
+|---------|-------|-------|
+| Invalid ID returns HTML | 200 + HTML ❌ | 404 + JSON ✅ Fixed |
+| Invalid sub-resource returns HTML | 200 + HTML ❌ | 404 + JSON ✅ Fixed |
+
+---
+
+## ⚠️ Findings & Observations (Day 2)
+
+### Finding 1 — Internal Java Details Leaked in Error Messages
+| Field | Details |
+|-------|---------|
+| Endpoints | GET /api/v1/instances with invalid integer params |
+| Type | Security — Improper Error Handling |
+| Severity | Low |
+| GitHub Issue | #3366 |
+| Status | 🔴 Open — Awaiting maintainer confirmation |
+| Reference | OWASP Improper Error Handling, CWE-248 |
+| Details | When invalid values are passed to integer query parameters (pageSize, pageNum), the API exposes internal Java/Spring class names (java.lang.String, fromIndex, toIndex) in error messages. These should never be visible to API consumers. |
+| Recommendation | Replace raw Spring exception messages with clean user-friendly error messages. Log full details server-side only. |
+
+---
+
+### Finding 2 — Undocumented Route Alias
 | Field | Details |
 |-------|---------|
 | Endpoint | /api/v1/instances/{id}/consumer-groups |
-| Expected | 404 JSON error |
-| Actual | 200 OK with HTML (SPA fallback) |
-| Type | API Design Issue |
-| Severity | Low |
-| Recommendation | Return JSON 404 for unknown API routes |
-
----
-
-### Finding 3 — Playground Authentication Behavior
-Not Documented in Official Docs
-| Field | Details |
-|-------|---------|
 | Type | Documentation Gap |
 | Severity | Low |
-| Details | Playground API is intentionally open without authentication. However this behavior is not mentioned anywhere in the official documentation at docs.automq.com. New users and testers may confuse this with a security oversight. |
-| Suggestion | Add a note in Playground docs explaining that no authentication is required and all data is mock/demo only. |
-| Confirmed By | @johnluoyx (AutoMQ Contributor) |
-| Reference | github.com/AutoMQ/automq/issues/3365 |
-| Status | 💡 Suggestion shared with maintainers |
+| Details | Both /groups and /consumer-groups return identical data. This alias is not mentioned in official documentation and may cause confusion. |
+| Recommendation | Document the alias or remove it to avoid ambiguity. |
 
 ---
 
-## 📚 Key Learnings
-- AutoMQ Playground is intentionally open —
-  no auth required by design (confirmed by maintainer)
-- All Playground data is mock/demo —
-  fully isolated from production systems
-- Real console (console.automq.cloud) correctly
-  enforces authentication
-- Service account keys are isolated per environment
-- Topics and Groups are sub-resources of Instances
-- Unknown routes return SPA HTML fallback
-  instead of JSON 404
-- Always confirm behavior with maintainers
-  before documenting assumptions
-- Always check documentation before suggesting
-  improvements
+### Finding 3 — pageSize=0 Accepted Silently
+| Field | Details |
+|-------|---------|
+| Endpoint | GET /api/v1/instances?pageNum=1&pageSize=0 |
+| Type | API Validation Issue |
+| Severity | Low |
+| Details | Passing pageSize=0 returns 200 OK with empty list instead of 400 Bad Request. Zero is not a valid page size and should be rejected with a clear error. |
+| Recommendation | Validate pageSize > 0 and return 400 with a clear message. |
 
 ---
 
@@ -181,8 +293,23 @@ Not Documented in Official Docs
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | /api/v1/instances | List all instances |
+| GET | /api/v1/instances/{id} | Get single instance detail |
 | GET | /api/v1/instances/{id}/topics | List topics |
 | GET | /api/v1/instances/{id}/groups | List consumer groups |
+| GET | /api/v1/instances/{id}/consumer-groups | Undocumented alias for /groups |
+
+---
+
+## 📚 Key Learnings
+- AutoMQ Playground is intentionally open — no auth required by design (confirmed by maintainer)
+- All Playground data is mock/demo — fully isolated from production systems
+- Real console (console.automq.cloud) correctly enforces authentication
+- Service account keys are isolated per environment
+- Topics and Groups are sub-resources of Instances
+- API uses smart defaults: pageNum=1, pageSize=10 when no params provided
+- totalPage is dynamically calculated based on pageSize per request
+- Always confirm behavior with maintainers before documenting assumptions
+- Always validate findings against official references (OWASP) before reporting
 
 ---
 
@@ -197,3 +324,11 @@ Not Documented in Official Docs
 | Answer | Intentionally open by design — demo environment |
 | Date Confirmed | 20 May 2026 |
 | Link | github.com/AutoMQ/automq/issues/3365 |
+
+### Internal Error Message Leakage
+| Field | Details |
+|-------|---------|
+| GitHub Issue | #3366 |
+| Status | 🔴 Open — Awaiting maintainer response |
+| Date Reported | 21 May 2026 |
+| Link | github.com/AutoMQ/automq/issues/3366 |
