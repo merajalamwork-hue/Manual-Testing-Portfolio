@@ -329,6 +329,7 @@ authentication behavior, and error handling.
 | Field | Details |
 |-------|---------|
 | GitHub Issue | #3366 |
-| Status | 🔴 Open — Awaiting maintainer response |
+| Status |✅ Closed — Acknowledged by maintainer |
+|Answer| Improvement planned for future release|
 | Date Reported | 21 May 2026 |
 | Link | github.com/AutoMQ/automq/issues/3366 |
