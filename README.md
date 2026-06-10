@@ -3,7 +3,7 @@
 | Testing Type | Status | Bugs Found | Apps Tested |
 |---|---|---|---|
 | Security & Business Logic | ✅ Active | 3 | 1 |
-| Functional & UI | ✅ Active | 3 | 3 |
+| Functional & UI | ✅ Active | 4 | 4 |
 | API Testing | ✅ Active | 1 | 1 |
 
 A structured portfolio of bugs discovered through manual exploratory testing across multiple web applications — covering security vulnerabilities, business logic flaws, functional/UI issues, and API error handling.
@@ -22,12 +22,12 @@ Manual Software Tester with hands-on experience in functional testing, explorato
 
 | Metric | Count |
 |---|---|
-| Applications Tested | 5 |
-| Total Bugs Found | 7 |
+| Applications Tested | 6 |
+| Total Bugs Found | 8 |
 | Security / Business Logic Bugs | 3 |
-| Functional / UI Bugs | 3 |
+| Functional / UI Bugs | 4 |
 | API Bugs | 1 |
-| Critical / High Severity | 3 |
+| Critical / High Severity | 4 |
 | Medium Severity | 3 |
 | Low Severity | 1 |
 
@@ -42,6 +42,7 @@ Manual Software Tester with hands-on experience in functional testing, explorato
 | WordPress Playground | Sandbox CMS Environment | Functional & Workflow |
 | https://app.plane.so/ | Web Application (SaaS) | UI & Functional |
 | AutoMQ | Open Source Message Queue | API Testing & Error Validation |
+| Signal – Private Messenger | Mobile App (Android) | Input Validation / Functional |
 
 ---
 
@@ -55,7 +56,8 @@ Manual-Testing-Portfolio/
 ├── functional-testing/
 │   ├── mifos_bugs.md                  # UI bug — Mifos X
 │   ├── wordpress_bugs.md              # Workflow bug — WordPress
-│   └── plane_bugs.md                  # UI & workflow bugs — Plane.so
+│   ├── plane_bugs.md                  # UI & workflow bugs — Plane.so
+│   └── signal_bugs.md                 # Input validation bug — Signal Android
 ├── api-testing/
 │   └── automq-api-testing.md          # API testing — AutoMQ
 └── evidence/
@@ -191,6 +193,39 @@ Environment: Samsung Galaxy A22 4G · Android 13 · Chrome 148.0.7778.120
 
 ---
 
+### 📱 Signal – Private Messenger (Android)
+
+#### 🔴 BUG-008 — Donation Custom Amount Field Accepts Unrealistically Large Values — No Input Validation
+
+| Field | Details |
+|---|---|
+| Severity | High |
+| Type | Input Validation / Boundary Value Failure |
+| Module | Donation Screen → Custom Amount Field |
+| Status | Open |
+| GitHub Issue | [#14750](https://github.com/signalapp/Signal-Android/issues/14750) |
+| Date Reported | 1 May 2026 |
+| Impact | Users can reach payment screen with invalid 30+ digit amounts; no error or limit enforced |
+
+**Steps to Reproduce:**
+1. Open Signal app
+2. Tap Profile icon → **Donate to Signal**
+3. Tap the **custom amount input field**
+4. Enter a very large number (e.g. `9999999999999999999999999`)
+5. Observe — no error shown, Continue button stays active
+6. Tap **Continue**
+7. Observe — app navigates to payment screen successfully
+
+**Expected:** App enforces a maximum donation limit; inline error message appears; Continue button is disabled for invalid amounts
+
+**Actual:** App accepts any number regardless of size (30+ digits) with no validation error; user proceeds to payment screen with an invalid amount
+
+Environment: Samsung Galaxy A22 4G · Android 13 · Signal v8.7.3
+
+👉 [View GitHub Issue](https://github.com/signalapp/Signal-Android/issues/14750)
+
+---
+
 ## 🌐 API Testing — AutoMQ
 
 API error handling and information disclosure bug found during manual API testing of the AutoMQ open source message queue platform.
@@ -221,6 +256,7 @@ Passing an alphabetic string (e.g. `pageSize=abc`) to an integer query parameter
 - API testing with Postman (parameter validation, error response analysis)
 - Basic security checks (authentication, authorization flows)
 - UI consistency and responsiveness testing
+- Mobile app testing (Android — functional and input validation)
 
 ---
 
@@ -233,6 +269,7 @@ Passing an alphabetic string (e.g. `pageSize=abc`) to an integer query parameter
 - How workflow-breaking bugs affect core user journeys
 - How to test and document API error handling and information disclosure issues
 - How to engage with open source maintainers and confirm findings via GitHub Issues
+- Boundary value testing on mobile apps and the risks of uncapped numeric input fields
 
 ---
 
