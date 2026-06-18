@@ -3,7 +3,7 @@
 | Testing Type | Status | Bugs Found | Apps Tested |
 |---|---|---|---|
 | Security & Business Logic | ✅ Active | 3 | 1 |
-| Functional & UI | ✅ Active | 4 | 4 |
+| Functional & UI | ✅ Active | 5 | 5 |
 | API Testing | ✅ Active | 1 | 1 |
 
 A structured portfolio of bugs discovered through manual exploratory testing across multiple web applications — covering security vulnerabilities, business logic flaws, functional/UI issues, and API error handling.
@@ -22,13 +22,13 @@ Manual Software Tester with hands-on experience in functional testing, explorato
 
 | Metric | Count |
 |---|---|
-| Applications Tested | 6 |
-| Total Bugs Found | 8 |
+| Applications Tested | 7 |
+| Total Bugs Found | 9 |
 | Security / Business Logic Bugs | 3 |
-| Functional / UI Bugs | 4 |
+| Functional / UI Bugs | 5 |
 | API Bugs | 1 |
 | Critical / High Severity | 4 |
-| Medium Severity | 3 |
+| Medium Severity | 4 |
 | Low Severity | 1 |
 
 ---
@@ -43,6 +43,7 @@ Manual Software Tester with hands-on experience in functional testing, explorato
 | https://app.plane.so/ | Web Application (SaaS) | UI & Functional |
 | AutoMQ | Open Source Message Queue | API Testing & Error Validation |
 | Signal – Private Messenger | Mobile App (Android) | Input Validation / Functional |
+| Saleor Storefront | Open Source eCommerce Storefront | Responsive UI & Hydration / DOM Validation |
 
 ---
 
@@ -57,7 +58,8 @@ Manual-Testing-Portfolio/
 │   ├── mifos_bugs.md                  # UI bug — Mifos X
 │   ├── wordpress_bugs.md              # Workflow bug — WordPress
 │   ├── plane_bugs.md                  # UI & workflow bugs — Plane.so
-│   └── signal_bugs.md                 # Input validation bug — Signal Android
+│   ├── signal_bugs.md                 # Input validation bug — Signal Android
+│   └── saleor_bugs.md                 # Responsive UI & hydration bug — Saleor Storefront
 ├── api-testing/
 │   └── automq-api-testing.md          # API testing — AutoMQ
 └── evidence/
@@ -193,6 +195,37 @@ Environment: Samsung Galaxy A22 4G · Android 13 · Chrome 148.0.7778.120
 
 ---
 
+### 🛒 Saleor Storefront
+
+#### 🟠 BUG-009 — Hamburger Menu Disappears on Tablet/Landscape Viewports + Hydration Error from Invalid HTML Structure
+
+| Field | Details |
+|---|---|
+| Severity | Medium |
+| Type | Responsive UI / DOM Structure (Hydration) Bug |
+| Module | Header Navigation (Mobile + Desktop Nav) |
+| Status | ✅ Confirmed — Fix submitted via [PR #1212](https://github.com/saleor/storefront/pull/1212) |
+| GitHub Issue | [#1198](https://github.com/saleor/storefront/issues/1198) |
+| Impact | Users on mid-size viewports (e.g. tablets in landscape) lose all navigation access; hydration mismatch causes React console errors |
+
+**Steps to Reproduce:**
+1. Open the Saleor storefront in a browser
+2. Resize/emulate a viewport between `768px` and `1024px` width (e.g. Pixel 7 in landscape at `915px`)
+3. Observe the header navigation area
+4. Check browser console for hydration warnings
+
+**Expected:** Either the hamburger menu or the desktop navigation should be visible at all viewport widths; server-rendered and client-rendered DOM should match with no hydration errors
+
+**Actual:**
+- Hamburger toggle was hidden at the `md` breakpoint (`768px`), but desktop nav didn't appear until `lg` (`1024px`) — creating a "dead zone" where neither menu rendered
+- Desktop `<nav>` contained `<li>` elements without a wrapping `<ul>`, and the mobile `<SearchBar>` was placed directly inside a `<ul>` without an `<li>` wrapper — invalid HTML nesting that caused a React hydration mismatch
+
+**Root Cause Confirmed By Maintainer/Contributor:** Breakpoint mismatch between mobile toggle (`md:hidden`) and desktop nav (`lg:flex`), plus missing semantic `<ul>`/`<li>` wrappers. Fix changes the hamburger breakpoint to `lg:hidden` and adds proper list semantics.
+
+👉 [View GitHub Issue #1198](https://github.com/saleor/storefront/issues/1198) · [View Fix — PR #1212](https://github.com/saleor/storefront/pull/1212)
+
+---
+
 ### 📱 Signal – Private Messenger (Android)
 
 #### 🔴 BUG-008 — Donation Custom Amount Field Accepts Unrealistically Large Values — No Input Validation
@@ -257,6 +290,7 @@ Passing an alphabetic string (e.g. `pageSize=abc`) to an integer query parameter
 - Basic security checks (authentication, authorization flows)
 - UI consistency and responsiveness testing
 - Mobile app testing (Android — functional and input validation)
+- Responsive breakpoint testing and DOM/hydration structure validation
 
 ---
 
@@ -270,6 +304,7 @@ Passing an alphabetic string (e.g. `pageSize=abc`) to an integer query parameter
 - How to test and document API error handling and information disclosure issues
 - How to engage with open source maintainers and confirm findings via GitHub Issues
 - Boundary value testing on mobile apps and the risks of uncapped numeric input fields
+- How breakpoint mismatches between components create responsive "dead zones," and how invalid HTML nesting can trigger React hydration errors
 
 ---
 
