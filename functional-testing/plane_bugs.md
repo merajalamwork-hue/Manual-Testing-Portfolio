@@ -16,6 +16,7 @@
 | Input Validation Bugs | 1 |
 | Severity | Medium / Low |
 | Reported to Plane GitHub | ✅ Yes (both) |
+| Bugs Fixed by Maintainers | 1 |
 
 ---
 
@@ -100,15 +101,21 @@ The "+ Add quick Link" text overlaps with the Plane AI description text, causing
 | Type | Input Validation Bug |
 | Module | Workspace Settings |
 | Component | General Settings → Workspace Name Field |
-| Status | Open — Assigned to @pushya22, @vihar |
+| Status | ✅ Closed — Fixed in [#9263](https://github.com/makeplane/plane/pull/9263) |
 | Reported To | [makeplane/plane#9255](https://github.com/makeplane/plane/issues/9255) |
-| Date | 2026-06-17 |
+| Date Reported | 2026-06-17 |
+| Date Fixed | 2026-06-20 |
 | Response Time | Triaged, labeled, and assigned within 9 minutes of filing |
+| Fix PR | [#9263 — fix: Require at least one alphanumeric char in workspace name](https://github.com/makeplane/plane/pull/9263) |
+| Fix Commit | `0f1f4d5` |
+| Closed By | @sriramveeraghanta |
+| Community Confirmation | Independently confirmed by @Huaian666 on Ubuntu 22.04 |
+| Retest Status | ⏳ Pending — fix merged, awaiting cloud deployment |
 
 ### Description
 The Workspace name field in Workspace Settings → General validates character composition in real time — entering a disallowed character (e.g. a comma `,`) is immediately rejected with the inline error: *"Workspace name can only contain letters, numbers, spaces, hyphens, and underscores."*
 
-However, this validation only checks **character type**, not **character content**. A workspace name made up entirely of hyphens, underscores, and/or spaces — with zero letters or numbers — passes validation and is saved successfully, producing a non-descriptive workspace name (e.g. `-_________-`) that persists across the UI: settings header, sidebar, and workspace switcher.
+However, this validation only checked **character type**, not **character content**. A workspace name made up entirely of hyphens, underscores, and/or spaces — with zero letters or numbers — passed validation and was saved successfully, producing a non-descriptive workspace name (e.g. `-_________-`) that persisted across the UI: settings header, sidebar, and workspace switcher.
 
 ### Steps to Reproduce
 1. Go to **Workspace Settings → General**
@@ -120,9 +127,9 @@ However, this validation only checks **character type**, not **character content
 Given the field already enforces a character allowlist with real-time feedback, it should also reject names with zero alphanumeric characters — e.g. with an error like *"Workspace name must contain at least one letter or number."*
 
 ### Actual Result
-- Toast confirms: **"Workspace updated successfully"**
-- The name `-_________-` persists after page refresh
-- The symbol-only name renders across sidebar, settings header, and workspace switcher
+- Toast confirmed: **"Workspace updated successfully"**
+- The name `-_________-` persisted after page refresh
+- The symbol-only name rendered across sidebar, settings header, and workspace switcher
 
 ### Evidence Table
 
@@ -142,7 +149,18 @@ Given the field already enforces a character allowlist with real-time feedback, 
 | Environment | Production |
 | Version | Latest |
 
+### Fix Details
+
+| Field | Details |
+|-------|---------|
+| Fix Type | Server-side validation update |
+| Fix Description | Enforces at least one alphanumeric character in workspace name |
+| Merged Into | makeplane/plane main branch |
+| Commit | `0f1f4d5` |
+| PR | [#9263](https://github.com/makeplane/plane/pull/9263) |
+
 ### Testing Techniques Applied
 - Exploratory Testing
 - Boundary / Input Validation Testing
 - Character allowlist edge case analysis
+- Regression Testing (retest pending post-deployment)
